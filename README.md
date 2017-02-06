@@ -1,0 +1,2 @@
+# slackAzy
+Automate Slack Login
