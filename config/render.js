@@ -27,7 +27,7 @@ module.exports = (logs) => {
       'padding-left': 0,
       'padding-right': 0
     },
-    colWidths: [30, 50, 30, 100]
+    colWidths: [30, 20, 30, 50]
   });
 
   for (let log of logs) {

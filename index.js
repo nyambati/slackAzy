@@ -1,6 +1,8 @@
 const Utils = require('./utils');
+require('dotenv').load();
 const startDate = process.env.START_DATE;
 const endDate = process.env.END_DATE;
+const render = require('./config/render');
 
 
 if(!startDate && !endDate) {
@@ -9,10 +11,17 @@ if(!startDate && !endDate) {
 }
 
 let freckle = new Utils(startDate, endDate);
-
-
+const arr = [];
 freckle.logHours()
-.then(res => {
-    console.log(freckle.filterData(res.data));
-})
-.catch(error => console.log("something failed"));
+.subscribe(res => {
+    const data = freckle.filterData(res);
+    // console.log(data);
+    arr.push(data);
+    console.log('============================');
+}, err => {
+    console.log('errr', err);
+}, complete => {
+    render(arr);
+    console.log('done');
+    process.exit(0);
+});
