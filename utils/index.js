@@ -3,7 +3,7 @@ const Rx = require('rxjs/Rx');
 const Progress = require('progress');
 //const ProgressBar = require('../config/progress-bar');
 const freckleUrl = 'https://api.letsfreckle.com/v2';
-require('dotenv').load();
+// require('dotenv').load();
 const freckleToken = process.env.PERSONAL_ACCESS_TOKEN;
 
 /**
@@ -11,7 +11,7 @@ const freckleToken = process.env.PERSONAL_ACCESS_TOKEN;
  * @param {[type]} days [description]
  */
 
-Date.prototype.addDays = function(days) {
+Date.prototype.addDays = function (days) {
   let date = new Date(this.valueOf())
   date.setDate(date.getDate() + days);
   return date;
@@ -23,16 +23,17 @@ class Utils {
    * @param  {[type]} dateToLogHoursTo [description]
    * @return {[type]}                  [description]
    */
-  constructor(startDate, endDate) {
+  constructor(startDate, endDate, hours, description, projectName) {
     this.datesArray = this.getDates(new Date(startDate), new Date(endDate));
+    Object.assign(this, { hours, description, projectName });
   }
 
   payload(dateToLogHoursTo) {
     return {
       "date": `${dateToLogHoursTo}`,
-      "minutes": Number(process.env.HOURS) * 60,
-      "description": process.env.TAG_NAMES,
-      "project_name": process.env.PROJECT_NAME
+      "minutes": Number(this.hours) * 60,
+      "description": this.description,
+      "project_name": this.projectName
     };
   }
 
@@ -105,4 +106,4 @@ class Utils {
 
 }
 
-module.exports = Utils;
+module.exports = Utils;;

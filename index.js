@@ -3,6 +3,9 @@ const Progress = require('ascii-progress');
 require('dotenv').load();
 const startDate = process.env.START_DATE;
 const endDate = process.env.END_DATE;
+const description = process.env.TAG_NAMES;
+const projectName = process.env.PROJECT_NAME;
+const hours = process.env.HOURS
 const render = require('./config/render');
 
 if (!startDate && !endDate) {
@@ -10,13 +13,15 @@ if (!startDate && !endDate) {
   process.exit(1)
 }
 
-let freckle = new Utils(startDate, endDate);
+let freckle = new Utils(startDate, endDate, hours, description, projectName);
 const arr = [];
+
 const progress = new Progress({
   schema: '[:bar.green] :current/:total :percent :etas',
   clear: true,
   total: freckle.datesArray.length
 });
+
 freckle.logHours()
   .subscribe(res => {
     const data = freckle.filterData(res);
@@ -25,9 +30,6 @@ freckle.logHours()
   }, err => {
     console.log('errr', err);
   }, complete => {
-    // if (progress.completed) {
-    //   progress.clear();
-    // }
     console.log()
     render(arr);
     process.exit(0);
