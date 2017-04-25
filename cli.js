@@ -1,32 +1,12 @@
 const vorpal = require('vorpal')();
-const Utils = require('./utils');
+const Utils = require('./utils/freckle');
+const { hasAllOptions, isValidDate } = require('./utils/helpers');
 const Progress = require('ascii-progress');
 const render = require('./config/render');
 
 if (!process.env.PERSONAL_ACCESS_TOKEN) {
   console.log('Environment variable PERSONAL_ACCESS_TOKEN is not set')
   process.exit(1)
-}
-
-function hasAllOptions(options, context) {
-  let test = (options.project && options.description && options.hours);
-  switch (context) {
-    case 'today':
-      if (test) {
-        return true
-      }
-      return false
-    default:
-      if (test && options.startDate && options.endDate) {
-        return true;
-      }
-      return false
-  }
-}
-
-function isValidDate(date) {
-  let test = ((/(\d{4}[-]\d{2}[-]\d{2})/ig).test(date) && date.length === 10)
-  return test && (new Date(date) !== 'Invalid Date')
 }
 
 vorpal
@@ -37,27 +17,28 @@ vorpal
   .option('-s, --startDate <startDate>', 'The date you would like to log hours from')
   .option('-e, --endDate <endDate>', 'The date you would like to log hours upto')
   .action(function (args, callback) {
+    const self = this;
     switch (args.command) {
       case 'today':
         if (args.options && hasAllOptions(args.options, args.command)) {
-          this.log('logging hours for today ', args.options);
+          self.log('logging hours for today ', args.options);
           return callback();
         }
-        this.log('missing options for command ' + args.command)
+        self.log('missing options for command ' + args.command)
         return callback();
       case 'range':
 
         if (!args.options || !hasAllOptions(args.options, args.command)) {
-          this.log('missing options for command ' + args.command)
+          self.log('missing options for command ' + args.command)
           return callback();
         }
 
         let { startDate, endDate, hours, description, project } = args.options;
 
         if (!isValidDate(startDate) || !isValidDate(endDate)) {
-          this.log(`You have logged Invalid date, this is the allowed format <YYYY-MM-DD>`)
-          this.log(`Start Date: ${startDate} is ${isValidDate(startDate) ? '' : 'not'} valid`)
-          this.log(`End Date: ${endDate} is ${isValidDate(endDate) ? "" : 'not'} valid`)
+          self.log(`You have logged Invalid date, this is the allowed format <YYYY-MM-DD>`)
+          self.log(`Start Date: ${startDate} is ${isValidDate(startDate) ? '' : 'not'} valid`)
+          self.log(`End Date: ${endDate} is ${isValidDate(endDate) ? "" : 'not'} valid`)
           return callback()
         }
 
@@ -71,23 +52,28 @@ vorpal
           total: freckle.datesArray.length
         })
 
-        freckle.logHours()
-          .subscribe(res => {
-            const data = freckle.filterData(res);
-            arr.push(data);
-            progress.tick()
-          }, err => {
-            console.log('This is the returned Error:', err.data);
-            return callback();
-          }, complete => {
-            console.log()
-            render(arr);
-            console.log()
-            return callback();
-          });
+        const onComplete = () => {
+          self.log()
+          render(arr);
+          self.log()
+          return callback();
+        }
+
+        const onSuccess = (res) => {
+          const data = freckle.filterData(res);
+          arr.push(data);
+          progress.tick()
+        }
+
+        const onError = () => {
+          self.log('This is the returned Error:', err.data);
+          return callback();
+        }
+
+        freckle.logHours().subscribe(onSuccess, onError, onComplete);
         break;
       default:
-        this.log('Unkown command');
+        self.log('Unkown command');
         return callback();
     }
   });

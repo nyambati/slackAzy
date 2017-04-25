@@ -1,4 +1,4 @@
-const Utils = require('./utils');
+const Utils = require('./utils/freckle');
 const Progress = require('ascii-progress');
 require('dotenv').load();
 const startDate = process.env.START_DATE;
