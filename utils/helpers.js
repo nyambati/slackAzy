@@ -19,4 +19,11 @@ function isValidDate(date) {
     return test && (new Date(date) !== 'Invalid Date')
 }
 
-module.exports = { hasAllOptions, isValidDate };
+const emoji = {
+    facePalm: '🤦🏻‍♂️',
+    angry: '😡',
+    fire: '🔥',
+    alarm: '🚨'
+}
+
+module.exports = { hasAllOptions, isValidDate, emoji };

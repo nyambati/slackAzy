@@ -1,11 +1,13 @@
 const vorpal = require('vorpal')();
-const Utils = require('./utils/freckle');
-const { hasAllOptions, isValidDate } = require('./utils/helpers');
+const logger = require('color-log');
 const Progress = require('ascii-progress');
+const Utils = require('./utils/freckle');
+const { hasAllOptions, isValidDate, emoji } = require('./utils/helpers');
 const render = require('./config/render');
+const appName = 'slackazy'
 
 if (!process.env.PERSONAL_ACCESS_TOKEN) {
-  console.log('Environment variable PERSONAL_ACCESS_TOKEN is not set')
+  logger.error(` [ ${emoji.alarm} ]: Environment variable PERSONAL_ACCESS_TOKEN is not set`)
   process.exit(1)
 }
 
@@ -29,16 +31,15 @@ vorpal
       case 'range':
 
         if (!args.options || !hasAllOptions(args.options, args.command)) {
-          self.log('missing options for command ' + args.command)
+          logger.error(`[ ${emoji.angry} ]: missing required arguments for command ${args.command}`)
           return callback();
         }
 
         let { startDate, endDate, hours, description, project } = args.options;
 
         if (!isValidDate(startDate) || !isValidDate(endDate)) {
-          self.log(`You have logged Invalid date, this is the allowed format <YYYY-MM-DD>`)
-          self.log(`Start Date: ${startDate} is ${isValidDate(startDate) ? '' : 'not'} valid`)
-          self.log(`End Date: ${endDate} is ${isValidDate(endDate) ? "" : 'not'} valid`)
+          let message = `${!isValidDate(startDate) ? startDate : ''}, ${!isValidDate(endDate) ? endDate : ''} `
+          logger.error(`[${emoji.angry}]: Invalid date, ${message} : use[YYYY - MM - DD] format`)
           return callback()
         }
 
@@ -53,7 +54,6 @@ vorpal
         })
 
         const onComplete = () => {
-          self.log()
           render(arr);
           self.log()
           return callback();
@@ -65,23 +65,23 @@ vorpal
           progress.tick()
         }
 
-        const onError = () => {
-          self.log('This is the returned Error:', err.data);
+        const onError = (error) => {
+          logger.error(` [ ${emoji.angry} ]: ${error}`);
           return callback();
         }
 
         freckle.logHours().subscribe(onSuccess, onError, onComplete);
         break;
       default:
-        self.log('Unkown command');
+        logger.warn(`[${emoji.facePalm} ] Unkown command, ${args.command}`);
         return callback();
     }
   });
 
 vorpal.catch('[words...]', 'Catches incorrect commands')
   .action(function (args, cb) {
-    this.log(args.words.join(' ') + ' is not a valid command.');
+    logger.error(`[${emoji.angry} ] : ${args.words.join(' ')} is not a valid command.`);
     cb();
   });
 
-vorpal.delimiter('[ slakezy ]').show();
+vorpal.delimiter(`[${appName} ]`).show();

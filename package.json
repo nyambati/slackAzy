@@ -4,16 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon cli.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "ascii-progress": "^1.0.5",
     "axios": "^0.15.3",
     "cli-table": "^0.3.1",
+    "color-log": "^0.0.2",
+    "color-logger": "^0.0.6",
     "dotenv": "^4.0.0",
     "progress": "^1.1.8",
-    "rxjs": "^5.2.0"
+    "rxjs": "^5.2.0",
+    "vorpal": "^1.12.0"
   }
 }
